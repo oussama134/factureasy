@@ -1,0 +1,179 @@
+/* Container des notifications */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  min-width: 300px;
+  max-width: 400px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  overflow: hidden;
+}
+
+.notification.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Contenu de la notification */
+.notification-content {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.notification-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.notification-message {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+  line-height: 1.4;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+}
+
+.notification-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+/* Barre de progression */
+.notification-progress {
+  height: 3px;
+  background: rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.notification-progress::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: currentColor;
+  animation: progress 3s linear forwards;
+}
+
+@keyframes progress {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+/* Types de notifications */
+.notification-success {
+  border-left: 4px solid #28a745;
+  color: #28a745;
+}
+
+.notification-success .notification-icon {
+  color: #28a745;
+}
+
+.notification-error {
+  border-left: 4px solid #dc3545;
+  color: #dc3545;
+}
+
+.notification-error .notification-icon {
+  color: #dc3545;
+}
+
+.notification-warning {
+  border-left: 4px solid #ffc107;
+  color: #856404;
+}
+
+.notification-warning .notification-icon {
+  color: #ffc107;
+}
+
+.notification-info {
+  border-left: 4px solid #17a2b8;
+  color: #17a2b8;
+}
+
+.notification-info .notification-icon {
+  color: #17a2b8;
+}
+
+/* Animation d'entrée */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+    max-width: none;
+  }
+  
+  .notification-content {
+    padding: 0.75rem 1rem;
+  }
+  
+  .notification-message {
+    font-size: 0.9rem;
+  }
+}
+
+/* Animation de secousse pour les erreurs */
+.notification-error.show {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+} 
