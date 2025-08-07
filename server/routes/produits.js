@@ -1,59 +1,121 @@
 const express = require('express');
 const router = express.Router();
 const Produit = require('../models/Produit');
-const { authenticateUser, checkOwnership, filterByUser } = require('../middlewears/auth');
+const { authenticateJWT } = require('../middlewears/jwtAuth');
 
-// GET toutes les produits (protégé par authentification)
-router.get('/', authenticateUser, filterByUser(Produit), async (req, res) => {
+// GET - Récupérer produits selon le rôle
+router.get('/', authenticateJWT, async (req, res) => {
   try {
-    const produits = await Produit.find(req.userFilter).sort({ nom: 1 });
+    console.log('🔍 === RÉCUPÉRATION PRODUITS ===');
+    console.log('👤 Utilisateur:', req.user.email);
+    console.log('👑 Rôle:', req.user.role);
+    
+    let produits = [];
+    
+    if (req.user.role === 'admin') {
+      // Admin voit tous les produits
+      produits = await Produit.find({});
+      console.log('👑 Admin voit tous les produits:', produits.length);
+    } else {
+      // User voit seulement ses produits
+      produits = await Produit.find({ createdBy: req.user.id });
+      console.log('👤 User voit ses produits:', produits.length);
+    }
+    
+    console.log('✅ Envoi de', produits.length, 'produits');
     res.json(produits);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error('❌ Erreur récupération produits:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
-// POST nouvelle produit (protégé par authentification)
-router.post('/', authenticateUser, async (req, res) => {
+// POST - Créer produit
+router.post('/', authenticateJWT, async (req, res) => {
   try {
-    const produit = new Produit({
+    console.log('🔍 === CRÉATION PRODUIT ===');
+    console.log('👤 Utilisateur:', req.user.email);
+    
+    const produitData = {
       ...req.body,
       createdBy: req.user.id
-    });
+    };
+    
+    const produit = new Produit(produitData);
     await produit.save();
+    
+    console.log('✅ Produit créé:', produit.nom, 'par', req.user.email);
     res.status(201).json(produit);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+  } catch (error) {
+    console.error('❌ Erreur création produit:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
-
-// DELETE une produit (protégé par authentification)
-router.delete('/:id', authenticateUser, checkOwnership(Produit), async (req, res) => {
+// GET - Récupérer un produit spécifique
+router.get('/:id', authenticateJWT, async (req, res) => {
   try {
-    await Produit.findByIdAndDelete(req.params.id);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const produit = await Produit.findById(req.params.id);
+    
+    if (!produit) {
+      return res.status(404).json({ error: 'Produit non trouvé' });
+    }
+    
+    // Vérifier l'accès
+    if (req.user.role !== 'admin' && produit.createdBy.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ error: 'Accès non autorisé' });
+    }
+    
+    res.json(produit);
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
-
-// PUT update produit (protégé par authentification)
-router.put('/:id', authenticateUser, checkOwnership(Produit), async (req, res) => {
+// PUT - Modifier un produit
+router.put('/:id', authenticateJWT, async (req, res) => {
   try {
+    const produit = await Produit.findById(req.params.id);
+    
+    if (!produit) {
+      return res.status(404).json({ error: 'Produit non trouvé' });
+    }
+    
+    // Vérifier l'accès
+    if (req.user.role !== 'admin' && produit.createdBy.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ error: 'Accès non autorisé' });
+    }
+    
     const updatedProduit = await Produit.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true }
     );
-    res.status(200).json(updatedProduit);
+    res.json(updatedProduit);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
-
-
+// DELETE - Supprimer un produit
+router.delete('/:id', authenticateJWT, async (req, res) => {
+  try {
+    const produit = await Produit.findById(req.params.id);
+    
+    if (!produit) {
+      return res.status(404).json({ error: 'Produit non trouvé' });
+    }
+    
+    // Vérifier l'accès
+    if (req.user.role !== 'admin' && produit.createdBy.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ error: 'Accès non autorisé' });
+    }
+    
+    await Produit.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Produit supprimé avec succès' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
 
 module.exports = router;

@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { getDashboardStats } from '../services/dashboardService';
 import useNotification from '../hooks/useNotification';
 import Notification from '../components/Notification';
-import { useAuth } from '@clerk/clerk-react';
+// JWTLogin supprimé
+// import { useAuth } from '@clerk/clerk-react'; // Supprimé - utilisation de JWT
 import './Dashboard.css';
 
 function Dashboard() {
   const navigate = useNavigate();
-  const { getToken, isSignedIn } = useAuth();
+  // const { getToken, isSignedIn } = useAuth(); // Supprimé - utilisation de JWT
   const [stats, setStats] = useState({
     totalDevis: 0,
     totalFactures: 0,
@@ -63,14 +64,7 @@ function Dashboard() {
         setLoading(true);
         setError(null); // Réinitialiser l'erreur
         
-        // Test direct du token
-        console.log('🔍 Test direct du token dans Dashboard');
-        console.log('🔍 isSignedIn:', isSignedIn);
-        
-        if (isSignedIn) {
-          const token = await getToken();
-          console.log('🔍 Token direct:', token ? 'Présent' : 'Absent');
-        }
+        console.log('🔍 Test JWT dans Dashboard');
         
         const data = await getDashboardStats();
         setStats(data);
@@ -79,8 +73,8 @@ function Dashboard() {
         
         // Gestion spécifique des erreurs d'authentification
         if (err.response?.status === 401) {
-          setError('Session expirée. Veuillez vous reconnecter.');
-          showError('Session expirée. Veuillez vous reconnecter.');
+          setError('Session expirée. Veuillez vous reconnecter avec JWT.');
+          showError('Session expirée. Veuillez vous reconnecter avec JWT.');
         } else {
           setError('Erreur lors du chargement des statistiques');
           showError('Erreur lors du chargement des statistiques');
@@ -91,7 +85,7 @@ function Dashboard() {
     };
 
     fetchStats();
-  }, [isSignedIn, getToken]);
+  }, []);
 
   // Fonctions pour les boutons d'action
   const handleNouvelleFacture = () => {
@@ -195,6 +189,9 @@ function Dashboard() {
   return (
     <>
       <div className="dashboard-container">
+        {/* Composant JWT Login pour tester l'authentification */}
+        {/* JWTLogin supprimé */}
+        
         <div className="dashboard-header">
           <h1>📊 Tableau de Bord</h1>
           <p>Vue d'ensemble de votre activité</p>
@@ -360,23 +357,7 @@ function Dashboard() {
           </button>
         </div>
 
-        <div className="quick-stats">
-          <h3>🚀 Actions Rapides</h3>
-          <div className="quick-actions">
-            <button className="quick-btn" onClick={handleVoirFactures}>
-              📋 Toutes les Factures
-            </button>
-            <button className="quick-btn" onClick={handleVoirDevis}>
-              📄 Tous les Devis
-            </button>
-            <button className="quick-btn" onClick={handleVoirClients}>
-              👥 Gérer les Clients
-            </button>
-            <button className="quick-btn" onClick={handleVoirProduits}>
-              📦 Gérer les Produits
-            </button>
-          </div>
-        </div>
+
 
         <div className="dashboard-insights">
           <h3>📊 Insights & Rapports</h3>

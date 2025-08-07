@@ -34,24 +34,7 @@ function Devis() {
     if (urlParams.get('action') === 'create') {
       setShowModal(true);
     }
-    
-    // Test de connectivité au serveur
-    testServerConnection();
   }, [location]);
-
-  const testServerConnection = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/devis');
-      console.log('Test de connectivité serveur:', response.status);
-      if (!response.ok) {
-        console.error('Serveur non accessible:', response.status, response.statusText);
-        showError('Serveur non accessible. Vérifiez que le serveur est démarré.');
-      }
-    } catch (error) {
-      console.error('Erreur de connectivité serveur:', error);
-      showError('Impossible de se connecter au serveur. Vérifiez que le serveur est démarré sur le port 5000.');
-    }
-  };
 
   const fetchData = async () => {
     try {

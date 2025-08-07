@@ -1,71 +1,66 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:5000/api';
-
-// Instance axios de base
+// Configuration de base d'axios
 const api = axios.create({
-  baseURL: BASE_URL,
-  timeout: 10000
+  baseURL: 'http://localhost:5000/api',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
-// Fonction pour obtenir le token d'authentification
-const getAuthToken = async () => {
-  try {
-    // Essayer plusieurs méthodes pour récupérer le token
-    if (window.Clerk?.session) {
-      const token = await window.Clerk.session.getToken();
-      return token;
-    }
-    
-    // Fallback: essayer avec useAuth hook
-    if (window.Clerk?.user) {
-      const token = await window.Clerk.user.getToken();
-      return token;
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('Erreur lors de la récupération du token:', error);
-    return null;
-  }
+// Fonction pour récupérer le token JWT
+const getAuthToken = () => {
+  const token = localStorage.getItem('jwt_token');
+  return token;
 };
 
-// Intercepteur pour ajouter le token d'authentification
+// Fonction pour récupérer l'email de l'utilisateur connecté (fallback)
+const getUserEmail = () => {
+  // Supprimé pour des raisons de sécurité - utilisation JWT uniquement
+  console.log('🔍 Tentative d\'utilisation du fallback - NON AUTORISÉ');
+  return null;
+};
+
+// Intercepteur pour ajouter l'authentification JWT
 api.interceptors.request.use(async (config) => {
   try {
-    console.log('🔍 Tentative de récupération du token pour:', config.url);
-    console.log('🔍 Clerk disponible:', !!window.Clerk);
-    console.log('🔍 Session disponible:', !!window.Clerk?.session);
-    console.log('🔍 User disponible:', !!window.Clerk?.user);
+    console.log('🔍 === REQUÊTE API ===');
+    console.log('🔍 URL:', config.url);
+    console.log('🔍 Méthode:', config.method);
     
-    const token = await getAuthToken();
-    console.log('✅ Token récupéré:', token ? 'Présent' : 'Absent');
-    
+    // Utilisation JWT uniquement - plus de fallback
+    const token = getAuthToken();
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-      console.log('✅ Headers configurés avec token');
-      console.log('🔍 URL finale:', config.baseURL + config.url);
-      console.log('🔍 Token format:', token.substring(0, 50) + '...');
-      console.log('🔍 Headers complets:', config.headers);
+      config.headers['Authorization'] = `Bearer ${token}`;
+      console.log('🔑 Token JWT ajouté:', token.substring(0, 20) + '...');
     } else {
-      console.warn('❌ Aucun token disponible pour la requête:', config.url);
+      console.error('❌ Token JWT manquant - authentification requise');
+      throw new Error('Token d\'authentification manquant');
     }
+    
   } catch (error) {
-    console.error('❌ Erreur lors de la récupération du token:', error);
+    console.error('❌ Erreur lors de la configuration des headers:', error);
   }
   return config;
 });
 
-// Intercepteur pour gérer les erreurs d'authentification
+// Intercepteur pour gérer les erreurs
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('✅ Réponse reçue:', response.status);
+    return response;
+  },
   (error) => {
+    console.error('❌ Erreur API:', error.response?.status, error.response?.data);
     if (error.response?.status === 401) {
-      // Ne pas rediriger automatiquement, laisser l'application gérer l'erreur
-      console.warn('Erreur d\'authentification 401:', error.response?.data);
+      console.warn('🔐 Erreur d\'authentification 401');
     }
     return Promise.reject(error);
   }
 );
+
+// Fonctions supprimées pour des raisons de sécurité
+// L'authentification se fait maintenant uniquement via JWT
 
 export default api; 

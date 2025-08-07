@@ -81,7 +81,8 @@ const factureSchema = new mongoose.Schema({
     type: Date
   },
   createdBy: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   }
 }, {
@@ -90,20 +91,36 @@ const factureSchema = new mongoose.Schema({
 
 // Middleware pour calculer automatiquement les montants
 factureSchema.pre('save', function(next) {
-  // Calcul du sous-total
-  this.sousTotal = this.lignes.reduce((total, ligne) => {
-    const prixLigne = ligne.prixUnitaire * ligne.quantite;
-    const remiseLigne = prixLigne * (ligne.remise / 100);
-    return total + (prixLigne - remiseLigne);
-  }, 0);
+  try {
+    // Vérifier que lignes existe et n'est pas vide
+    if (!this.lignes || !Array.isArray(this.lignes) || this.lignes.length === 0) {
+      this.sousTotal = 0;
+      this.montantHT = 0;
+      this.montantTTC = 0;
+      return next();
+    }
 
-  // Calcul du montant HT après remise globale
-  this.montantHT = this.sousTotal * (1 - this.remiseGlobale / 100);
+    // Calcul du sous-total
+    this.sousTotal = this.lignes.reduce((total, ligne) => {
+      if (!ligne.prixUnitaire || !ligne.quantite) {
+        return total;
+      }
+      const prixLigne = ligne.prixUnitaire * ligne.quantite;
+      const remiseLigne = prixLigne * ((ligne.remise || 0) / 100);
+      return total + (prixLigne - remiseLigne);
+    }, 0);
 
-  // Calcul du montant TTC
-  this.montantTTC = this.montantHT * (1 + this.tva / 100);
+    // Calcul du montant HT après remise globale
+    this.montantHT = this.sousTotal * (1 - (this.remiseGlobale || 0) / 100);
 
-  next();
+    // Calcul du montant TTC
+    this.montantTTC = this.montantHT * (1 + (this.tva || 20) / 100);
+
+    next();
+  } catch (error) {
+    console.error('❌ Erreur calcul montants facture:', error);
+    next(error);
+  }
 });
 
 // Méthode pour générer le numéro de facture

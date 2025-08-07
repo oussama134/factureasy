@@ -1,0 +1,152 @@
+.jwt-login {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+  border: 2px solid #6366f1;
+}
+
+.jwt-login h3 {
+  margin: 0 0 20px 0;
+  color: #6366f1;
+  text-align: center;
+  font-size: 1.2em;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9em;
+}
+
+.form-group input {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 1em;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.login-btn {
+  background: #6366f1;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 150px;
+}
+
+.login-btn:hover:not(:disabled) {
+  background: #5855eb;
+}
+
+.login-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.test-users {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.test-users p {
+  margin: 0 0 10px 0;
+  font-size: 0.9em;
+  color: #6b7280;
+  text-align: center;
+}
+
+.test-user-btn {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  cursor: pointer;
+  margin: 2px;
+  transition: all 0.2s;
+}
+
+.test-user-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.auth-status {
+  text-align: center;
+}
+
+.user-info {
+  margin-bottom: 15px;
+}
+
+.user-info p {
+  margin: 5px 0;
+  color: #374151;
+}
+
+.user-info strong {
+  color: #6366f1;
+  font-size: 1.1em;
+}
+
+.role {
+  background: #10b981;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.logout-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logout-btn:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.logout-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+} 

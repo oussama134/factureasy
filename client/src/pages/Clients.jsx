@@ -88,11 +88,13 @@ function Clients() {
     setNewClient({ nom: '', email: '', entreprise: '', telephone: '' });
   };
 
-  const filteredClients = clients.filter(client =>
-    client.nom?.toLowerCase().includes(search.toLowerCase()) ||
-    client.email?.toLowerCase().includes(search.toLowerCase()) ||
-    client.entreprise?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredClients = clients
+    .filter(client =>
+      client.nom?.toLowerCase().includes(search.toLowerCase()) ||
+      client.email?.toLowerCase().includes(search.toLowerCase()) ||
+      client.entreprise?.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Tri par date d'ajout (plus récent en premier)
 
   return (
     <>

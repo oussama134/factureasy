@@ -1,27 +1,28 @@
-import { useAuth } from '@clerk/clerk-react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const ProtectedRoute = ({ children }) => {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn, loading } = useAuth();
 
-  // Afficher un loader pendant le chargement de l'authentification
-  if (!isLoaded) {
+  if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Chargement...</p>
-        </div>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '1.2rem'
+      }}>
+        🔄 Chargement...
       </div>
     );
   }
 
-  // Rediriger vers la page de connexion si non connecté
   if (!isSignedIn) {
-    return <Navigate to="/sign-in" replace />;
+    return <Navigate to="/login" replace />;
   }
 
-  // Afficher le contenu protégé si connecté
   return children;
 };
 

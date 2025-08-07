@@ -91,7 +91,8 @@ const devisSchema = new mongoose.Schema({
     type: String
   },
   createdBy: {
-    type: String, // ID de l'utilisateur Clerk
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   }
 }, {

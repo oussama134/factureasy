@@ -1,11 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const { authenticateUser, requireAdmin } = require('../middlewears/auth');
+const { authenticateJWT } = require('../middlewears/jwtAuth');
 
 // GET tous les utilisateurs (admin seulement)
-router.get('/', authenticateUser, requireAdmin, async (req, res) => {
+router.get('/', authenticateJWT, async (req, res) => {
   try {
+    // Vérifier que l'utilisateur est admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Accès admin requis' });
+    }
+
     console.log('👑 Récupération de tous les utilisateurs...');
     const users = await User.find({}).select('-__v').sort({ createdAt: -1 });
     console.log(`✅ ${users.length} utilisateurs trouvés`);
@@ -17,7 +22,7 @@ router.get('/', authenticateUser, requireAdmin, async (req, res) => {
 });
 
 // GET utilisateur par ID
-router.get('/:id', authenticateUser, async (req, res) => {
+router.get('/:id', authenticateJWT, async (req, res) => {
   try {
     const user = await User.findOne({ clerkId: req.params.id }).select('-__v');
     if (!user) {
@@ -30,8 +35,13 @@ router.get('/:id', authenticateUser, async (req, res) => {
 });
 
 // POST créer un nouvel utilisateur (admin seulement)
-router.post('/', authenticateUser, requireAdmin, async (req, res) => {
+router.post('/', authenticateJWT, async (req, res) => {
   try {
+    // Vérifier que l'utilisateur est admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Accès admin requis' });
+    }
+
     console.log('👑 Création d\'un nouvel utilisateur...');
     const { clerkId, email, firstName, lastName, role } = req.body;
     
@@ -60,8 +70,13 @@ router.post('/', authenticateUser, requireAdmin, async (req, res) => {
 });
 
 // PUT modifier le rôle d'un utilisateur (admin seulement)
-router.put('/:id/role', authenticateUser, requireAdmin, async (req, res) => {
+router.put('/:id/role', authenticateJWT, async (req, res) => {
   try {
+    // Vérifier que l'utilisateur est admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Accès admin requis' });
+    }
+
     console.log('👑 Modification du rôle utilisateur...');
     const { role } = req.body;
     
@@ -88,8 +103,13 @@ router.put('/:id/role', authenticateUser, requireAdmin, async (req, res) => {
 });
 
 // PUT activer/désactiver un utilisateur (admin seulement)
-router.put('/:id/status', authenticateUser, requireAdmin, async (req, res) => {
+router.put('/:id/status', authenticateJWT, async (req, res) => {
   try {
+    // Vérifier que l'utilisateur est admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Accès admin requis' });
+    }
+
     console.log('👑 Modification du statut utilisateur...');
     const { isActive } = req.body;
     
@@ -111,21 +131,23 @@ router.put('/:id/status', authenticateUser, requireAdmin, async (req, res) => {
   }
 });
 
-// DELETE supprimer un utilisateur (super admin seulement)
-router.delete('/:id', authenticateUser, async (req, res) => {
+// DELETE supprimer un utilisateur (admin seulement)
+router.delete('/:id', authenticateJWT, async (req, res) => {
   try {
-    // Seul un super admin peut supprimer des utilisateurs
-    if (req.user.role !== 'super_admin') {
-      return res.status(403).json({ error: 'Accès super admin requis' });
+    // Vérifier que l'utilisateur est admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Accès admin requis' });
     }
-    
+
+    console.log('👑 Suppression d\'un utilisateur...');
     const user = await User.findOneAndDelete({ clerkId: req.params.id });
+    
     if (!user) {
       return res.status(404).json({ error: 'Utilisateur non trouvé' });
     }
     
     console.log('✅ Utilisateur supprimé:', user.email);
-    res.json({ success: true, message: 'Utilisateur supprimé' });
+    res.json({ message: 'Utilisateur supprimé avec succès' });
   } catch (err) {
     console.error('❌ Erreur suppression utilisateur:', err);
     res.status(500).json({ error: err.message });

@@ -4,11 +4,16 @@ const Client = require('../models/Client');
 const Facture = require('../models/Facture');
 const Devis = require('../models/Devis');
 const Produit = require('../models/Produit');
-const { authenticateUser, requireAdmin } = require('../middlewears/auth');
+const { authenticateJWT } = require('../middlewears/jwtAuth');
 
 // GET statistiques globales (admin seulement)
-router.get('/stats', authenticateUser, requireAdmin, async (req, res) => {
+router.get('/stats', authenticateJWT, async (req, res) => {
   try {
+    // Vérifier que l'utilisateur est admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Accès admin requis' });
+    }
+
     console.log('👑 Récupération des statistiques admin...');
     
     const stats = {
@@ -36,8 +41,13 @@ router.get('/stats', authenticateUser, requireAdmin, async (req, res) => {
 });
 
 // GET tous les clients (admin seulement)
-router.get('/clients', authenticateUser, requireAdmin, async (req, res) => {
+router.get('/clients', authenticateJWT, async (req, res) => {
   try {
+    // Vérifier que l'utilisateur est admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Accès admin requis' });
+    }
+
     console.log('👑 Récupération de tous les clients (admin)...');
     const clients = await Client.find({}).sort({ nom: 1 });
     console.log(`✅ ${clients.length} clients trouvés (admin)`);
@@ -49,8 +59,13 @@ router.get('/clients', authenticateUser, requireAdmin, async (req, res) => {
 });
 
 // GET toutes les factures (admin seulement)
-router.get('/factures', authenticateUser, requireAdmin, async (req, res) => {
+router.get('/factures', authenticateJWT, async (req, res) => {
   try {
+    // Vérifier que l'utilisateur est admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Accès admin requis' });
+    }
+
     console.log('👑 Récupération de toutes les factures (admin)...');
     const factures = await Facture.find({})
       .populate('client')
@@ -64,8 +79,13 @@ router.get('/factures', authenticateUser, requireAdmin, async (req, res) => {
 });
 
 // GET tous les devis (admin seulement)
-router.get('/devis', authenticateUser, requireAdmin, async (req, res) => {
+router.get('/devis', authenticateJWT, async (req, res) => {
   try {
+    // Vérifier que l'utilisateur est admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Accès admin requis' });
+    }
+
     console.log('👑 Récupération de tous les devis (admin)...');
     const devis = await Devis.find({})
       .populate('client')

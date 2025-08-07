@@ -167,8 +167,8 @@ function FormDevis({ devis, clients, produits, onSave, onCancel }) {
         quantite: parseFloat(ligne.quantite) || 0,
         prixUnitaire: parseFloat(ligne.prixUnitaire) || 0,
         remise: parseFloat(ligne.remise) || 0
-      })),
-      createdBy: 'user_id' // Sera remplacé par l'ID de l'utilisateur connecté
+      }))
+      // createdBy sera géré par le serveur lors de la création
     };
 
     console.log('Données du devis préparées:', devisData);

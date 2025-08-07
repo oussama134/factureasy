@@ -1,10 +1,18 @@
 import { Link, useLocation } from 'react-router-dom';
-import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from '@clerk/clerk-react';
+import { useAuth } from '../hooks/useAuth';
+import { useRole } from '../hooks/useRole';
 import './Navbar.css';
 
 function Navbar() {
   const location = useLocation();
-  const { user } = useUser();
+  const { isSignedIn, user, logout } = useAuth();
+  const { userRole } = useRole();
+
+  const handleLogout = () => {
+    logout();
+    // Rediriger vers la page de connexion ou dashboard
+    window.location.href = '/';
+  };
 
   return (
     <nav className="navbar">
@@ -12,9 +20,10 @@ function Navbar() {
         <Link to="/dashboard">
           📄 FactureEasy
         </Link>
-        {user && (
+        {isSignedIn && user && (
           <div className="user-welcome">
-            <span>👋 Bienvenue, {user.firstName || 'Utilisateur'} !</span>
+            <span>👋 Bienvenue, {user.firstName || user.email} !</span>
+            <span className="user-role">👑 {userRole}</span>
           </div>
         )}
       </div>
@@ -53,26 +62,27 @@ function Navbar() {
       </div>
       
       <div className="navbar-auth">
-        <SignedOut>
-          <SignInButton mode="modal">
+        {!isSignedIn ? (
+          <Link to="/login">
             <button className="auth-nav-btn">
               🔐 Connexion
             </button>
-          </SignInButton>
-        </SignedOut>
-        <SignedIn>
-          <UserButton 
-            appearance={{
-              elements: {
-                userButtonAvatarBox: {
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%'
-                }
-              }
-            }}
-          />
-        </SignedIn>
+          </Link>
+        ) : (
+          <div className="user-menu">
+            <div className="user-info">
+              <span className="user-avatar">
+                {user?.firstName?.charAt(0) || user?.email?.charAt(0) || 'U'}
+              </span>
+              <span className="user-name">
+                {user?.firstName || user?.email}
+              </span>
+            </div>
+            <button onClick={handleLogout} className="logout-btn">
+              🚪 Déconnexion
+            </button>
+          </div>
+        )}
       </div>
     </nav>
   );
