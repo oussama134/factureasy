@@ -37,7 +37,15 @@ function Produits() {
   };
 
   const handleChange = (e) => {
-    setNewProduit({ ...newProduit, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    let processedValue = value;
+    
+    // Convertir les valeurs numériques
+    if (name === 'prix' || name === 'tva') {
+      processedValue = value === '' ? 0 : parseFloat(value) || 0;
+    }
+    
+    setNewProduit({ ...newProduit, [name]: processedValue });
   };
 
   const handleSubmit = async (e) => {
@@ -78,7 +86,13 @@ function Produits() {
   };
 
   const handleAddNew = () => {
-    setNewProduit({ nom: '', prix: '', description: '', tva: '', categorie: '' });
+    setNewProduit({ 
+      nom: '', 
+      prix: 0, // Changé de '' à 0 pour être un Number
+      description: '', 
+      tva: 20, // Changé de '' à 20 pour être un Number
+      categorie: '' 
+    });
     setEditingId(null);
     setShowModal(true);
   };
@@ -86,7 +100,13 @@ function Produits() {
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingId(null);
-    setNewProduit({ nom: '', prix: '', description: '', tva: '', categorie: '' });
+    setNewProduit({ 
+      nom: '', 
+      prix: 0, // Changé de '' à 0
+      description: '', 
+      tva: 20, // Changé de '' à 20
+      categorie: '' 
+    });
   };
 
   const filteredProduits = produits.filter(produit =>
