@@ -36,22 +36,43 @@ router.post('/', authenticateJWT, async (req, res) => {
     console.log('🔍 === CRÉATION PRODUIT ===');
     console.log('👤 Utilisateur:', req.user.email);
     console.log('🆔 User ID:', req.user.id);
+    console.log('👑 Rôle:', req.user.role);
+    console.log('📦 Body reçu:', req.body);
     
     const produitData = {
       ...req.body,
       createdBy: req.user.id.toString() // Convertir en string
     };
     
-    console.log('📦 Données produit:', produitData);
+    console.log('📦 Données produit finales:', produitData);
+    
+    // Vérifier que les champs requis sont présents
+    if (!produitData.nom) {
+      console.log('❌ Nom manquant');
+      return res.status(400).json({ error: 'Nom du produit requis' });
+    }
+    
+    if (!produitData.prix) {
+      console.log('❌ Prix manquant');
+      return res.status(400).json({ error: 'Prix du produit requis' });
+    }
+    
+    if (!produitData.categorie) {
+      console.log('❌ Catégorie manquante');
+      return res.status(400).json({ error: 'Catégorie du produit requise' });
+    }
     
     const produit = new Produit(produitData);
+    console.log('📦 Produit créé (avant save):', produit);
+    
     await produit.save();
     
-    console.log('✅ Produit créé:', produit.nom, 'par', req.user.email);
+    console.log('✅ Produit créé avec succès:', produit.nom, 'par', req.user.email);
     res.status(201).json(produit);
   } catch (error) {
     console.error('❌ Erreur création produit:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+    console.error('❌ Stack trace:', error.stack);
+    res.status(500).json({ error: 'Erreur serveur', details: error.message });
   }
 });
 
