@@ -1,7 +1,152 @@
 const express = require('express');
-const router = express.Router();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { generateToken } = require('../middlewears/jwtAuth');
+const Client = require('../models/Client');
+const Produit = require('../models/Produit');
+const router = express.Router();
+
+// Route pour initialiser la base de données de production
+router.post('/init-db', async (req, res) => {
+  try {
+    console.log('🚀 Initialisation de la base de données de production...');
+    
+    // Vérifier si les utilisateurs existent déjà
+    const existingUsers = await User.find({});
+    if (existingUsers.length > 0) {
+      console.log('⚠️ Des utilisateurs existent déjà dans la base de données');
+      return res.json({ 
+        message: 'Base de données déjà initialisée',
+        users: existingUsers.map(u => ({ email: u.email, role: u.role }))
+      });
+    }
+
+    // Suppression des données existantes
+    await User.deleteMany({});
+    await Client.deleteMany({});
+    await Produit.deleteMany({});
+    console.log('🗑️ Base de données nettoyée');
+
+    // Création des utilisateurs de test
+    const hashedAdminPassword = await bcrypt.hash('admin123', 10);
+    const hashedUserPassword = await bcrypt.hash('user123', 10);
+
+    const adminUser = new User({
+      email: 'admin@factureasy.com',
+      password: hashedAdminPassword,
+      firstName: 'Admin',
+      lastName: 'FactureEasy',
+      role: 'admin',
+      company: 'FactureEasy'
+    });
+
+    const regularUser = new User({
+      email: 'user@factureasy.com',
+      password: hashedUserPassword,
+      firstName: 'Utilisateur',
+      lastName: 'Test',
+      role: 'user',
+      company: 'Entreprise Test'
+    });
+
+    await adminUser.save();
+    await regularUser.save();
+    console.log('✅ Utilisateurs créés avec succès');
+
+    // Création de données de test pour l'admin
+    const adminClients = [
+      {
+        nom: 'Entreprise ABC',
+        email: 'contact@abc.com',
+        telephone: '0123456789',
+        adresse: {
+          rue: '123 Rue de la Paix',
+          ville: 'Paris',
+          codePostal: '75001',
+          pays: 'France'
+        },
+        createdBy: adminUser._id.toString()
+      },
+      {
+        nom: 'Société XYZ',
+        email: 'info@xyz.com',
+        telephone: '0987654321',
+        adresse: {
+          rue: '456 Avenue des Champs',
+          ville: 'Lyon',
+          codePostal: '69001',
+          pays: 'France'
+        },
+        createdBy: adminUser._id.toString()
+      }
+    ];
+
+    const adminProduits = [
+      {
+        nom: 'Service de consultation',
+        description: 'Consultation professionnelle',
+        prix: 150,
+        categorie: 'Service',
+        createdBy: adminUser._id.toString()
+      },
+      {
+        nom: 'Développement web',
+        description: 'Création de site web',
+        prix: 500,
+        categorie: 'Service',
+        createdBy: adminUser._id.toString()
+      }
+    ];
+
+    await Client.insertMany(adminClients);
+    await Produit.insertMany(adminProduits);
+    console.log('✅ Données de test créées pour l\'admin');
+
+    // Création de données de test pour l'utilisateur
+    const userClients = [
+      {
+        nom: 'Client Personnel',
+        email: 'client@test.com',
+        telephone: '0555666777',
+        adresse: {
+          rue: '789 Boulevard Central',
+          ville: 'Marseille',
+          codePostal: '13001',
+          pays: 'France'
+        },
+        createdBy: regularUser._id.toString()
+      }
+    ];
+
+    const userProduits = [
+      {
+        nom: 'Produit Test',
+        description: 'Description du produit test',
+        prix: 75,
+        categorie: 'Produit',
+        createdBy: regularUser._id.toString()
+      }
+    ];
+
+    await Client.insertMany(userClients);
+    await Produit.insertMany(userProduits);
+    console.log('✅ Données de test créées pour l\'utilisateur');
+
+    console.log('🎉 Base de données de production initialisée avec succès !');
+    
+    res.json({ 
+      message: 'Base de données initialisée avec succès',
+      users: [
+        { email: 'admin@factureasy.com', role: 'admin', password: 'admin123' },
+        { email: 'user@factureasy.com', role: 'user', password: 'user123' }
+      ]
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'initialisation:', error);
+    res.status(500).json({ error: 'Erreur lors de l\'initialisation de la base de données' });
+  }
+});
 
 // POST - Login et génération de token JWT
 router.post('/login', async (req, res) => {
@@ -23,8 +168,9 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
     }
     
-    // Vérifier le mot de passe
-    if (user.password !== password) {
+    // Vérifier le mot de passe avec bcrypt
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
       console.log('❌ Mot de passe incorrect pour:', email);
       return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
     }
@@ -33,7 +179,17 @@ router.post('/login', async (req, res) => {
     console.log('👑 Rôle:', user.role);
     
     // Générer le token JWT
-    const token = generateToken(user);
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName
+      },
+      process.env.JWT_SECRET || 'factureasy_super_secret_key_2024_production',
+      { expiresIn: '24h' }
+    );
     console.log('🔑 Token généré:', token.substring(0, 20) + '...');
     
     // Réponse avec le token et les infos utilisateur
@@ -53,8 +209,8 @@ router.post('/login', async (req, res) => {
     console.log('✅ Login JWT réussi pour:', user.email);
     
   } catch (error) {
-    console.error('❌ Erreur login JWT:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+    console.error('❌ Erreur lors du login:', error);
+    res.status(500).json({ error: 'Erreur lors de la connexion' });
   }
 });
 
