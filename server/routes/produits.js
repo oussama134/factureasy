@@ -18,7 +18,7 @@ router.get('/', authenticateJWT, async (req, res) => {
       console.log('👑 Admin voit tous les produits:', produits.length);
     } else {
       // User voit seulement ses produits
-      produits = await Produit.find({ createdBy: req.user.id });
+      produits = await Produit.find({ createdBy: req.user.id.toString() });
       console.log('👤 User voit ses produits:', produits.length);
     }
     
@@ -35,11 +35,14 @@ router.post('/', authenticateJWT, async (req, res) => {
   try {
     console.log('🔍 === CRÉATION PRODUIT ===');
     console.log('👤 Utilisateur:', req.user.email);
+    console.log('🆔 User ID:', req.user.id);
     
     const produitData = {
       ...req.body,
-      createdBy: req.user.id
+      createdBy: req.user.id.toString() // Convertir en string
     };
+    
+    console.log('📦 Données produit:', produitData);
     
     const produit = new Produit(produitData);
     await produit.save();
@@ -62,7 +65,7 @@ router.get('/:id', authenticateJWT, async (req, res) => {
     }
     
     // Vérifier l'accès
-    if (req.user.role !== 'admin' && produit.createdBy.toString() !== req.user.id.toString()) {
+    if (req.user.role !== 'admin' && produit.createdBy !== req.user.id.toString()) {
       return res.status(403).json({ error: 'Accès non autorisé' });
     }
     
@@ -82,7 +85,7 @@ router.put('/:id', authenticateJWT, async (req, res) => {
     }
     
     // Vérifier l'accès
-    if (req.user.role !== 'admin' && produit.createdBy.toString() !== req.user.id.toString()) {
+    if (req.user.role !== 'admin' && produit.createdBy !== req.user.id.toString()) {
       return res.status(403).json({ error: 'Accès non autorisé' });
     }
     
