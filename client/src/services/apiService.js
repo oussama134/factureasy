@@ -29,14 +29,22 @@ api.interceptors.request.use(async (config) => {
     console.log('🔍 URL:', config.url);
     console.log('🔍 Méthode:', config.method);
     
-    // Utilisation JWT uniquement - plus de fallback
-    const token = getAuthToken();
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-      console.log('🔑 Token JWT ajouté:', token.substring(0, 20) + '...');
+    // Routes qui ne nécessitent pas d'authentification
+    const publicRoutes = ['/auth/login', '/auth/register'];
+    const isPublicRoute = publicRoutes.some(route => config.url?.includes(route));
+    
+    if (!isPublicRoute) {
+      // Utilisation JWT pour les routes protégées
+      const token = getAuthToken();
+      if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`;
+        console.log('🔑 Token JWT ajouté:', token.substring(0, 20) + '...');
+      } else {
+        console.error('❌ Token JWT manquant - authentification requise');
+        throw new Error('Token d\'authentification manquant');
+      }
     } else {
-      console.error('❌ Token JWT manquant - authentification requise');
-      throw new Error('Token d\'authentification manquant');
+      console.log('🔓 Route publique - pas de token requis');
     }
     
   } catch (error) {

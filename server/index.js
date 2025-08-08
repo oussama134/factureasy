@@ -6,8 +6,23 @@ const cors = require('cors');
 const app = express();
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://factureasy-client.onrender.com',
+  'https://factureasy.onrender.com'
+];
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: function (origin, callback) {
+    // Autoriser les requêtes sans origine (comme les apps mobiles)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-user-email', 'x-user-type']
