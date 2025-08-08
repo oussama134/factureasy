@@ -32,6 +32,7 @@ const produitSchema = new mongoose.Schema({
   },
   codeProduit: {
     type: String,
+    sparse: true, // Permet plusieurs valeurs null/undefined
     unique: true
   },
   statut: {

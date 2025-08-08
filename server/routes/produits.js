@@ -39,8 +39,16 @@ router.post('/', authenticateJWT, async (req, res) => {
     console.log('👑 Rôle:', req.user.role);
     console.log('📦 Body reçu:', req.body);
     
+    // Filtrer les champs vides
+    const filteredBody = {};
+    Object.keys(req.body).forEach(key => {
+      if (req.body[key] !== '' && req.body[key] !== null && req.body[key] !== undefined) {
+        filteredBody[key] = req.body[key];
+      }
+    });
+    
     const produitData = {
-      ...req.body,
+      ...filteredBody,
       createdBy: req.user.id.toString() // Convertir en string
     };
     
