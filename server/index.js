@@ -10,7 +10,9 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://factureasy-client.onrender.com',
   'https://factureasy.onrender.com',
-  'https://factureasy.vercel.app', // Frontend Vercel
+  'https://factureasy-front.vercel.app', // Frontend Vercel exact
+  'https://factureasy-front-fdya554ok-oussama134s-projects.vercel.app', // URL de déploiement Vercel
+  'https://factureasy.vercel.app', // URL personnalisée Vercel
   'https://factureasy-git-main-oussama134.vercel.app', // URL de déploiement Vercel
   'https://factureasy-oussama134.vercel.app' // URL personnalisée Vercel
 ];
