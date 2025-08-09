@@ -9,7 +9,10 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:3000',
   'https://factureasy-client.onrender.com',
-  'https://factureasy.onrender.com'
+  'https://factureasy.onrender.com',
+  'https://factureasy.vercel.app', // Frontend Vercel
+  'https://factureasy-git-main-oussama134.vercel.app', // URL de déploiement Vercel
+  'https://factureasy-oussama134.vercel.app' // URL personnalisée Vercel
 ];
 
 app.use(cors({

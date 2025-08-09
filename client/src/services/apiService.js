@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// Configuration de base d'axios
+// Configuration de l'API
 const api = axios.create({
-  baseURL: 'https://factureasy.onrender.com/api',
+  baseURL: 'https://factureasy.onrender.com/api', // Backend sur Render.com
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
