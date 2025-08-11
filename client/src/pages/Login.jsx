@@ -90,6 +90,16 @@ function Login() {
               <strong>👤 User :</strong> user@factureasy.com / user123
             </div>
           </div>
+          
+          <div className="registration-section">
+            <p>🆕 Pas encore de compte ?</p>
+            <button 
+              className="register-btn"
+              onClick={() => navigate('/register')}
+            >
+              📝 Créer un compte
+            </button>
+          </div>
         </div>
       </div>
     </div>

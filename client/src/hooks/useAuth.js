@@ -98,7 +98,32 @@ export const useAuth = () => {
       console.error('❌ Erreur lors du rafraîchissement du token:', error);
       logout();
     }
-    return null;
+  };
+
+  const register = async (userData) => {
+    try {
+      setLoading(true);
+      
+      const response = await api.post('/auth/register', userData);
+      
+      if (response.data.success) {
+        console.log('✅ Inscription réussie');
+        return { success: true };
+      } else {
+        return { 
+          success: false, 
+          error: response.data.error || 'Erreur lors de l\'inscription' 
+        };
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'inscription:', error);
+      return { 
+        success: false, 
+        error: error.response?.data?.error || 'Erreur lors de l\'inscription' 
+      };
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {
@@ -108,6 +133,7 @@ export const useAuth = () => {
     loading,
     login,
     logout,
-    refreshToken
+    refreshToken,
+    register
   };
 }; 
