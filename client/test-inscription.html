@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Inscription - FactureEasy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        .test-btn:hover {
+            background: #218838;
+        }
+        .test-btn.secondary {
+            background: #6c757d;
+        }
+        .test-btn.secondary:hover {
+            background: #5a6268;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test du Système d'Inscription - FactureEasy</h1>
+        
+        <div class="test-section">
+            <h2>📋 Vérifications</h2>
+            <p>Cette page teste les fonctionnalités d'inscription et de connexion.</p>
+            
+            <div id="status" class="status info">
+                🔍 Vérification en cours...
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔐 Test de Connexion</h2>
+            <p>Testez la connexion avec les comptes existants :</p>
+            
+            <button class="test-btn" onclick="testLogin('admin@factureasy.com', 'admin123')">
+                👑 Test Admin
+            </button>
+            
+            <button class="test-btn" onclick="testLogin('user@factureasy.com', 'user123')">
+                👤 Test User
+            </button>
+            
+            <div id="loginStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 Test d'Inscription</h2>
+            <p>Testez la création d'un nouveau compte :</p>
+            
+            <button class="test-btn" onclick="testRegister()">
+                🆕 Créer un compte test
+            </button>
+            
+            <div id="registerStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🌐 Test de Connexion</h2>
+            <p>Vérifiez que le serveur est accessible :</p>
+            
+            <button class="test-btn" onclick="testServer()">
+                🔍 Tester le serveur
+            </button>
+            
+            <div id="serverStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📱 Navigation</h2>
+            <p>Testez la navigation vers les pages :</p>
+            
+            <button class="test-btn secondary" onclick="window.open('/login', '_blank')">
+                🔐 Page de Connexion
+            </button>
+            
+            <button class="test-btn secondary" onclick="window.open('/register', '_blank')">
+                📝 Page d'Inscription
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://factureasy.onrender.com/api';
+        
+        // Test de connexion
+        async function testLogin(email, password) {
+            const statusDiv = document.getElementById('loginStatus');
+            statusDiv.innerHTML = '<div class="status info">🔄 Test de connexion en cours...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.token) {
+                    statusDiv.innerHTML = `
+                        <div class="status success">
+                            ✅ Connexion réussie pour ${email}<br>
+                            Rôle: ${data.user.role}<br>
+                            Token: ${data.token.substring(0, 20)}...
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="status error">
+                            ❌ Échec de connexion: ${data.error || 'Erreur inconnue'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ Erreur réseau: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Test d'inscription
+        async function testRegister() {
+            const statusDiv = document.getElementById('registerStatus');
+            statusDiv.innerHTML = '<div class="status info">🔄 Test d\'inscription en cours...</div>';
+            
+            const testUser = {
+                nom: 'Utilisateur Test',
+                email: `test${Date.now()}@example.com`,
+                password: 'test123456',
+                role: 'user'
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testUser)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    statusDiv.innerHTML = `
+                        <div class="status success">
+                            ✅ Inscription réussie !<br>
+                            Email: ${testUser.email}<br>
+                            Rôle: ${testUser.role}
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="status error">
+                            ❌ Échec d'inscription: ${data.error || 'Erreur inconnue'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ Erreur réseau: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Test du serveur
+        async function testServer() {
+            const statusDiv = document.getElementById('serverStatus');
+            statusDiv.innerHTML = '<div class="status info">🔄 Test du serveur en cours...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    statusDiv.innerHTML = `
+                        <div class="status success">
+                            ✅ Serveur accessible<br>
+                            Status: ${data.status}<br>
+                            MongoDB: ${data.mongodb}<br>
+                            Timestamp: ${new Date(data.timestamp).toLocaleString()}
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="status error">
+                            ❌ Serveur en erreur: ${data.error || 'Erreur inconnue'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ Serveur inaccessible: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Vérification initiale
+        window.onload = function() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `
+                <div class="status success">
+                    ✅ Page de test chargée avec succès !<br>
+                    Vous pouvez maintenant tester les différentes fonctionnalités.
+                </div>
+            `;
+        };
+    </script>
+</body>
+</html>
