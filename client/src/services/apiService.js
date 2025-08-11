@@ -3,7 +3,7 @@ import axios from 'axios';
 // Configuration de l'API
 const api = axios.create({
   baseURL: 'https://factureasy.onrender.com/api', // Backend sur Render.com
-  timeout: 10000,
+  timeout: 30000, // Augmentation du timeout pour Render
   headers: {
     'Content-Type': 'application/json'
   }

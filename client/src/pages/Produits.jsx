@@ -91,7 +91,8 @@ function Produits() {
       prix: 0, // Changé de '' à 0 pour être un Number
       description: '', 
       tva: 20, // Changé de '' à 20 pour être un Number
-      categorie: '' 
+      categorie: '',
+      codeProduit: '' // Ajout du champ codeProduit
     });
     setEditingId(null);
     setShowModal(true);
@@ -105,7 +106,8 @@ function Produits() {
       prix: 0, // Changé de '' à 0
       description: '', 
       tva: 20, // Changé de '' à 20
-      categorie: '' 
+      categorie: '',
+      codeProduit: '' // Ajout du champ codeProduit
     });
   };
 
@@ -198,6 +200,16 @@ function Produits() {
         title={editingId ? '📝 Modifier le Produit' : '➕ Nouveau Produit'}
       >
         <form className="produit-form" onSubmit={handleSubmit}>
+          <div className="form-row">
+            <label>🏷️ Code Produit</label>
+            <input 
+              name="codeProduit" 
+              placeholder="Code unique du produit (optionnel)" 
+              value={newProduit.codeProduit || ''} 
+              onChange={handleChange} 
+            />
+          </div>
+          
           <div className="form-row">
             <label>📦 Nom du Produit</label>
             <input 

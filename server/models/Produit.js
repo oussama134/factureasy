@@ -33,7 +33,13 @@ const produitSchema = new mongoose.Schema({
   codeProduit: {
     type: String,
     sparse: true, // Permet plusieurs valeurs null/undefined
-    unique: true
+    unique: true,
+    default: function() {
+      // Générer un code unique basé sur la catégorie et un timestamp
+      const timestamp = Date.now().toString(36);
+      const category = this.categorie ? this.categorie.substring(0, 3).toUpperCase() : 'PROD';
+      return `${category}-${timestamp}`;
+    }
   },
   statut: {
     type: String,
@@ -45,5 +51,16 @@ const produitSchema = new mongoose.Schema({
     required: true
   }
 }, { timestamps: true });
+
+// Middleware pour générer automatiquement le codeProduit si vide
+produitSchema.pre('save', function(next) {
+  // Si codeProduit est vide, null ou undefined, générer un code unique
+  if (!this.codeProduit || this.codeProduit.trim() === '') {
+    const timestamp = Date.now().toString(36);
+    const category = this.categorie ? this.categorie.substring(0, 3).toUpperCase() : 'PROD';
+    this.codeProduit = `${category}-${timestamp}`;
+  }
+  next();
+});
 
 module.exports = mongoose.model('Produit', produitSchema);

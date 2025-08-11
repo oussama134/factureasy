@@ -46,7 +46,7 @@ export const useAuth = () => {
         setUser(null);
         setIsSignedIn(false);
       } finally {
-        setLoading(false);
+        setLoading(false); 
       }
     };
 
