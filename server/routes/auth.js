@@ -259,6 +259,80 @@ router.get('/verify', async (req, res) => {
   }
 });
 
+// POST - Inscription d'un nouvel utilisateur
+router.post('/register', async (req, res) => {
+  try {
+    console.log('🔍 === INSCRIPTION UTILISATEUR ===');
+    
+    const { nom, email, password, role } = req.body;
+    
+    // Validation des données
+    if (!nom || !email || !password || !role) {
+      return res.status(400).json({ 
+        error: 'Tous les champs sont requis' 
+      });
+    }
+    
+    // Diviser le nom en firstName et lastName
+    const nameParts = nom.trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
+    if (password.length < 6) {
+      return res.status(400).json({ 
+        error: 'Le mot de passe doit contenir au moins 6 caractères' 
+      });
+    }
+    
+    if (!['user', 'admin'].includes(role)) {
+      return res.status(400).json({ 
+        error: 'Rôle invalide' 
+      });
+    }
+    
+    // Vérifier si l'email existe déjà
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ 
+        error: 'Un utilisateur avec cet email existe déjà' 
+      });
+    }
+    
+    // Hasher le mot de passe
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
+    // Créer le nouvel utilisateur
+    const newUser = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      role
+    });
+    
+    await newUser.save();
+    
+    console.log('✅ Utilisateur créé avec succès:', email);
+    
+    res.status(201).json({
+      success: true,
+      message: 'Compte créé avec succès',
+      user: {
+        id: newUser._id,
+        nom: `${newUser.firstName} ${newUser.lastName}`.trim(),
+        email: newUser.email,
+        role: newUser.role
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'inscription:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la création du compte' 
+    });
+  }
+});
+
 // POST - Refresh token
 router.post('/refresh', async (req, res) => {
   try {

@@ -12,6 +12,7 @@ const allowedOrigins = [
   'https://factureasy.onrender.com',
   'https://factureasy-front.vercel.app', // Frontend Vercel exact
   'https://factureasy-front-fdya554ok-oussama134s-projects.vercel.app', // URL de déploiement Vercel
+  'https://factureasy-front-gtivwr7f8-oussama134s-projects.vercel.app', // URL actuelle Vercel
   'https://factureasy.vercel.app', // URL personnalisée Vercel
   'https://factureasy-git-main-oussama134.vercel.app', // URL de déploiement Vercel
   'https://factureasy-oussama134.vercel.app' // URL personnalisée Vercel
